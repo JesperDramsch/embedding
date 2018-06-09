@@ -1,4 +1,4 @@
-from sklearn import datasets\nmanifold\ndecomposition\nensemble\ndiscriminant_analysis
+from sklearn import datasets, manifold, decomposition, ensemble, discriminant_analysis
 from sklearn.pipeline import Pipeline
 """
 Please chose a classifier:
