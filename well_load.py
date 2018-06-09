@@ -9,7 +9,7 @@ def wells_load(path2files):
     wellsdataframe=pd.DataFrame()
     for i in filelist:
         #Read in the LAS file
-        w = Well.from_las(i)
+        w = Well.from_las(os.path.join(path2files,i))
 
         #convert well data to a pandas dataframe
         w_df = pd.DataFrame(w.data)
