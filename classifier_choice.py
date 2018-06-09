@@ -1,6 +1,9 @@
 from sklearn import datasets, manifold, decomposition, ensemble, discriminant_analysis, preprocessing
 from sklearn.pipeline import Pipeline
-from sklearn.manifold import TSNE
+try:
+    from MulticoreTSNE import MulticoreTSNE as TSNE
+except ImportError:
+    from sklearn.manifold import TSNE
 
 """
 Please choose a classifier:
@@ -26,7 +29,7 @@ def scaler_choice(method='standard'):
 
 def classifier_choice(method='tsne', neighbors=30, dimensions=2):
     if method in "tsne":
-        return TSNE(n_components=dimensions, init='pca')
+        return TSNE(n_components=dimensions, n_jobs=8, perplexity=30, verbose=1)
     elif method in "pca":    
         return decomposition.TruncatedSVD(n_components=dimensions)
     elif method in "isomap":
@@ -55,5 +58,5 @@ def chainer(scaler='standard',classifier='tsne'):
     classifying = classifier_choice(classifier)
     return Pipeline([(scaler,scaling),(classifier,classifying)])
 
-def data_fit(classifier,data):
+def data_fit(classifier, data):
     return classifier.fit_transform(data)
