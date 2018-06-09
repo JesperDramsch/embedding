@@ -1,5 +1,7 @@
-from sklearn import datasets, manifold, decomposition, ensemble, discriminant_analysis
+from sklearn import datasets, manifold, decomposition, ensemble, discriminant_analysis, preprocessing
 from sklearn.pipeline import Pipeline
+from sklearn.manifold import TSNE
+
 """
 Please choose a classifier:
 pca = Principal Component Analysis
@@ -12,11 +14,19 @@ mds = Multi-dimensional scaling
 trees = Random Trees Embedding
 tsne = t-distributed stochastic neighbor embedding
 """
-
+def scaler_choice(method='standard'):
+    if method in "standard":
+        return preprocessing.StandardScaler()
+    elif method in "robust":    
+        return preprocessing.RobustScaler()
+    elif method in "sphere":
+        return preprocessing.Normalizer()
+    else:
+        print('Not a valid choice')
 
 def classifier_choice(method='tsne', neighbors=30, dimensions=2):
     if method in "tsne":
-        return manifold.TSNE(n_components=dimensions, init='pca')
+        return TSNE(n_components=dimensions, init='pca')
     elif method in "pca":    
         return decomposition.TruncatedSVD(n_components=dimensions)
     elif method in "isomap":
@@ -40,5 +50,10 @@ def classifier_choice(method='tsne', neighbors=30, dimensions=2):
     else:
         print('Please use valid method')
 
+def chainer(scaler='standard',classifier='tsne'):
+    scaling = scaler_choice(scaler)
+    classifying = classifier_choice(classifier)
+    return Pipeline([(scaler,scaling),(classifier,classifying)])
+
 def data_fit(classifier,data):
-	return classifier.fit_transform(data)
+    return classifier.fit_transform(data)
