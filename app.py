@@ -19,12 +19,23 @@ import sys
 import pandas as pd
 
 import lasio
+from well_load import *
+from classifier_choice import *
 
-from well_load import wells_load
 colors = ["springgreen","tomato","steelblue","tan","teal","thistle","turquoise","violet"]
 
 #load data
-df = wells_load("./static/data/peters_wells/")
+#df = wells_load("./static/data/peters_wells/")
+
+from time import time
+t0 = time()
+piper = chainer('robust','tsne')
+well_clusters = data_fit(piper,well_data.drop(['Well','TD'],axis=1))
+print(time()-t0)
+clean_cluster = well_clusters.copy()
+clean_cluster[clean_cluster > 1000] = 0
+plot_embedding(clean_cluster)
+plt.show()
 
 print(df.keys())
 X = np.random.rand(len(df), 10)
