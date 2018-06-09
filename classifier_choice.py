@@ -15,7 +15,6 @@ tsne = t-distributed stochastic neighbor embedding
 
 
 def classifier_choice(method='tsne', neighbors=30, dimensions=2):
-    X = data.copy()
     if method in "tsne":
         return manifold.TSNE(n_components=dimensions, init='pca')
     elif method in "pca":    
