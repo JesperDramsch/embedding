@@ -1,0 +1,6 @@
+Embedder
+python_version >'3.5'
+welly
+numpy
+bokeh
+matplotlib
