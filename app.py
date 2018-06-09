@@ -5,12 +5,13 @@ import time
 
 from bokeh.models import ColumnDataSource, TableColumn
 from bokeh.plotting import curdoc, figure
-from bokeh.models.widgets import Button
-from bokeh.layouts import row
+from bokeh.models.widgets import Button, Dropdown
+from bokeh.layouts import row, column
 from bokeh.models import CustomJS, ColumnDataSource
 from bokeh.plotting import figure, output_file, show
 from bokeh.models.widgets import DataTable, DateFormatter, TableColumn
 from bokeh.models import Circle
+from bokeh.models import PolyDrawTool
 from tornado import gen
 
 import numpy as np
@@ -41,14 +42,14 @@ source = ColumnDataSource(data=df)
 # see the same document.
 doc = curdoc()
 
-TOOLS = "lasso_select, pan,box_select,reset,help"
+TOOLS = "lasso_select, pan,box_select,reset,help,poly_draw"
 
 # create a new plot and add a renderer
-left = figure(tools=TOOLS, width=300, height=300, title=None, x_range=[0, 1], y_range=[0, 1])
+left = figure(tools=TOOLS, width=300, height=300, title=None, x_range=[0, 1], y_range=[0, 1], output_backend="webgl")
 left.circle('x', 'y', source=source, color='color')
 
 # create another new plot and add a renderer
-right = figure(tools=TOOLS, width=300, height=300, title=None, x_range=[df['GR'].min(), df['GR'].max()], y_range=[df['TD'].min(), df['TD'].max()])
+right = figure(tools=TOOLS, width=300, height=300, title=None, x_range=[df['GR'].min(), df['GR'].max()], y_range=[df['TD'].min(), df['TD'].max()], output_backend="webgl")
 right.circle('GR', 'TD', source=source, color='color')
 
 #Functions needed to update the graph based on long running task
@@ -70,6 +71,15 @@ run_button = Button(label="Run Dim-Red")
 
 #This is our Cluster making hack
 cluster_button = Button(label="Add Cluster")
+
+menu = [(key, "_".join(key.lower().split(" "))) for key in df.keys()]
+dropdown = Dropdown(label="Available Logs", button_type="warning", menu=menu)
+
+def function_to_call(attr, old, new):
+    print(dropdown.value)
+
+dropdown.on_change('value', function_to_call)
+dropdown.on_click(function_to_call)
 
 i = 0
 def callback():
@@ -101,6 +111,4 @@ source.callback = CustomJS(args=dict(colors=colors, clusters=i), code="""
          cb_obj.change.emit();
     """)
 
-doc.add_root(row(left, right, cluster_button, run_button))
-
-
+doc.add_root(row(left, right, column(dropdown, cluster_button, run_button)))
