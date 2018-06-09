@@ -15,15 +15,27 @@ from tornado import gen
 
 import numpy as np
 import sys
+import pandas as pd
 
-#load data
-X = np.random.rand(100, 10)
+import lasio
+
+from well_load import wells_load
 colors = ["springgreen","tomato","steelblue","tan","teal","thistle","turquoise","violet"]
 
-cluster = [0] * len(X)
-color = ["black"] * len(X)
+#load data
+df = wells_load("./static/data/peters_wells/")
 
-source = ColumnDataSource(data=dict(x=X[:, 0], y=X[:, 1], color=color, cluster=cluster))
+print(df.keys())
+X = np.random.rand(len(df), 10)
+cluster = [0] * len(df)
+color = ["black"] * len(df)
+
+df["color"] = pd.Series(color, index=df.index)
+df["cluster"] = pd.Series(cluster, index=df.index)
+df["x"] = pd.Series(X[:, 0], index=df.index)
+df["y"] = pd.Series(X[:, 1], index=df.index)
+
+source = ColumnDataSource(data=df)
 
 # This is important! Save curdoc() to make sure all threads
 # see the same document.
@@ -36,8 +48,8 @@ left = figure(tools=TOOLS, width=300, height=300, title=None, x_range=[0, 1], y_
 left.circle('x', 'y', source=source, color='color')
 
 # create another new plot and add a renderer
-right = figure(tools=TOOLS, width=300, height=300, title=None, x_range=[0, 1], y_range=[0, 1])
-right.circle('x', 'y', source=source, color='color')
+right = figure(tools=TOOLS, width=300, height=300, title=None, x_range=[df['GR'].min(), df['GR'].max()], y_range=[df['TD'].min(), df['TD'].max()])
+right.circle('GR', 'TD', source=source, color='color')
 
 #Functions needed to update the graph based on long running task
 @gen.coroutine

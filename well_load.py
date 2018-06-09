@@ -7,15 +7,15 @@ from welly import Well
 def wells_load(path2files):
     filelist = os.listdir(path2files)
     wellsdataframe=pd.DataFrame()
-    for i in filelist:
+    for f in filelist:
         #Read in the LAS file
-        w = Well.from_las(os.path.join(path2files,i))
+        w = Well.from_las(path2files+f)
 
         #convert well data to a pandas dataframe
         w_df = pd.DataFrame(w.data)
 
         #add well name to first column
-        w_df['Well'] = i
+        w_df['Well'] = f
 
         #add depth column
         dt = w.data['DT']
