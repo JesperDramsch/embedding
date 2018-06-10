@@ -29,7 +29,7 @@ def scaler_choice(method='standard'):
 
 def classifier_choice(method='tsne', neighbors=30, dimensions=2):
     if method in "tsne":
-        return TSNE(n_components=dimensions, n_jobs=8, perplexity=30, verbose=1)
+        return TSNE(n_components=dimensions, perplexity=30, verbose=1)
     elif method in "pca":    
         return decomposition.TruncatedSVD(n_components=dimensions)
     elif method in "isomap":
@@ -54,9 +54,10 @@ def classifier_choice(method='tsne', neighbors=30, dimensions=2):
         print('Please use valid method')
 
 def chainer(scaler='standard',classifier='tsne'):
+    imp = preprocessing.Imputer()
     scaling = scaler_choice(scaler)
     classifying = classifier_choice(classifier)
-    return Pipeline([(scaler,scaling),(classifier,classifying)])
+    return Pipeline([('clean',imp),(scaler,scaling),(classifier,classifying)])
 
 def data_fit(classifier, data):
     return classifier.fit_transform(data)
