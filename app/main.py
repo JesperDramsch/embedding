@@ -104,7 +104,8 @@ def  make_facies_log_plotmake_fa(logs, facies_colors):
 colors = ["springgreen","tomato","steelblue","tan","teal","thistle","turquoise","violet"]
 
 #load data
-df = pd.read_pickle("app/static/5_wells_p_30_no_pca.pkl")
+df = pd.read_pickle("app/static/well_dataframe.pkl")
+#df = df[np.where(df.Well == "16_7-11.las", True, False)]
 
 print(df.keys())
 #X = np.random.rand(len(df), 10)
@@ -116,8 +117,8 @@ df["cluster"] = pd.Series(cluster, index=df.index)
 #df["x"] = pd.Series(X[:, 0], index=df.index)
 #df["y"] = pd.Series(X[:, 1], index=df.index)
 
-fig = make_facies_log_plotmake_fa(df, facies_colors)
-fig.savefig("app/static/mpl_fig.png")
+#fig = make_facies_log_plotmake_fa(df, facies_colors)
+#fig.savefig("app/static/mpl_fig.png")
 source = ColumnDataSource(data=df)
 
 # This is important! Save curdoc() to make sure all threads
@@ -149,8 +150,14 @@ def run_task():
     thread = Thread(target=blocking_task)
     thread.start()
 
-run_button = Button(label="Run Dim-Red")
+def make_plot():
+    #fig = make_facies_log_plotmake_fa(source.to_df(), facies_colors)
+    #fig.savefig("app/static/mpl_fig.png")
+    print(source.to_df().keys())
+    #print(source.to_df().color.unique(), source.to_df().cluster.unique())
+    #source.to_df().to_pickle("app/static/5_wells_p_30_no_pca_with_clusters.pkl")
 
+run_button = Button(label="Run Dim-Red")
 #This is our Cluster making hack
 cluster_button = Button(label="Add Cluster")
 
@@ -163,7 +170,7 @@ def function_to_call(attr, old, new):
 dropdown.on_change('value', function_to_call)
 dropdown.on_click(function_to_call)
 
-i = 0
+i = 1
 def callback():
     global i
     i = i + 1
@@ -175,12 +182,30 @@ def callback():
              d1['cluster'][inds[i]] = clusters;
              d1['color'][inds[i]] = colors[clusters];
 	 }
-         cb_obj.change.emit();
+     cb_obj.change.emit();
     """)
     source.selected.indices = []
 
+
 cluster_button.on_click(callback)
 run_button.on_click(run_task)
+
+#make_plots_button.on_click(make_plot)
+
+save_callback = CustomJS(args=dict(source=source), code="""
+    function download(content, fileName, contentType) {
+        var a = document.createElement("a");
+        var file = new Blob([content], {type: contentType});
+        a.href = URL.createObjectURL(file);
+        a.download = fileName;
+        a.click();
+    }
+    console.log(source.data);
+    download(JSON.stringify(source.data['cluster']), "output.json", 'text\plain');
+""")
+
+
+make_plots_button = Button(label="Make Well Logs", callback=save_callback)
 
 source.callback = CustomJS(args=dict(colors=colors, clusters=i), code="""
 	 var inds = cb_obj.getv('selected')['1d'].indices;
@@ -190,8 +215,13 @@ source.callback = CustomJS(args=dict(colors=colors, clusters=i), code="""
              d1['cluster'][inds[i]] = clusters;
              d1['color'][inds[i]] = colors[clusters];
 	 }
-         cb_obj.change.emit();
+     cb_obj.change.emit();
     """)
+
+data_table_force_change = CustomJS(args=dict(source=source), code="""
+    source.change.emit()
+""")
+source.js_on_change('data', data_table_force_change)
 
 xdr = Range1d(start=0, end=300)
 ydr = Range1d(start=0, end=500)
@@ -208,4 +238,4 @@ p = figure(x_range=x_range, y_range=y_range)
 img_path = "app/static/mpl_fig.png"
 p.image_url(url=[img_path],x=x_range[0],y=y_range[1],w=x_range[1]-x_range[0],h=y_range[1]-y_range[0])
 
-doc.add_root(row(column(row(left, right), row(p)), column(dropdown, cluster_button, run_button)))
+doc.add_root(row(column(row(left, right), row(p)), column(dropdown, cluster_button, run_button, make_plots_button)))

@@ -28,4 +28,4 @@ def wells_load(path2files):
         b = a.fillna(method='ffill')
         c = b.fillna(method='bfill')
         wellsdataframe = pd.concat([wellsdataframe, c], axis=0)
-        return wellsdataframe
+    return wellsdataframe

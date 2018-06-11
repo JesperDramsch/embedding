@@ -1,9 +1,6 @@
 from sklearn import datasets, manifold, decomposition, ensemble, discriminant_analysis, preprocessing
 from sklearn.pipeline import Pipeline
-try:
-    from MulticoreTSNE import MulticoreTSNE as TSNE
-except ImportError:
-    from sklearn.manifold import TSNE
+from MulticoreTSNE import MulticoreTSNE as TSNE
 
 """
 Please choose a classifier:
